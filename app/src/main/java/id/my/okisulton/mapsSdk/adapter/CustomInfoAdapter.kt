@@ -1,13 +1,12 @@
-package id.my.okisulton.geofencing.adapter
+package id.my.okisulton.mapsSdk.adapter
 
 import android.app.Activity
 import android.content.Context
-import android.view.TextureView
 import android.view.View
 import android.widget.TextView
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.model.Marker
-import id.my.okisulton.geofencing.R
+import id.my.okisulton.mapsSdk.R
 
 /**
  *Created by osalimi on 10-01-2022.

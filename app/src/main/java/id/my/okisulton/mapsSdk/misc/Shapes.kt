@@ -1,9 +1,9 @@
-package id.my.okisulton.geofencing.misc
+package id.my.okisulton.mapsSdk.misc
 
 import android.graphics.Color
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.model.*
-import id.my.okisulton.geofencing.R
+import id.my.okisulton.mapsSdk.R
 import kotlinx.coroutines.delay
 
 /**

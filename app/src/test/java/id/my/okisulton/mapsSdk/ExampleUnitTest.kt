@@ -1,4 +1,4 @@
-package id.my.okisulton.geofencing
+package id.my.okisulton.mapsSdk
 
 import org.junit.Test
 

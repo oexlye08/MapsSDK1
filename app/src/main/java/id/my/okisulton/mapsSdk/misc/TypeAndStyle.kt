@@ -1,11 +1,10 @@
-package id.my.okisulton.geofencing.misc
+package id.my.okisulton.mapsSdk.misc
 
 import android.content.Context
 import android.view.MenuItem
-import android.widget.Toast
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.model.MapStyleOptions
-import id.my.okisulton.geofencing.R
+import id.my.okisulton.mapsSdk.R
 import java.lang.Exception
 
 /**

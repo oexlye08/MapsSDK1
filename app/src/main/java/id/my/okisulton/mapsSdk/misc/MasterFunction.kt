@@ -1,4 +1,4 @@
-package id.my.okisulton.geofencing.misc
+package id.my.okisulton.mapsSdk.misc
 
 import android.content.Context
 import android.content.res.Resources
@@ -9,7 +9,6 @@ import android.util.Log
 import android.widget.Toast
 import androidx.core.content.res.ResourcesCompat
 import com.google.android.gms.maps.model.BitmapDescriptor
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.graphics.drawable.DrawableCompat
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 

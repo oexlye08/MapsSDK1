@@ -1,33 +1,26 @@
-package id.my.okisulton.geofencing
+package id.my.okisulton.mapsSdk
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.content.res.Resources
-import android.graphics.Bitmap
-import android.graphics.Canvas
 import android.graphics.Color
-import android.graphics.drawable.Drawable
-import androidx.appcompat.app.AppCompatActivity
+import android.graphics.Point
 import android.os.Bundle
-import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
-import android.widget.Toast
-import androidx.core.content.res.ResourcesCompat
-import androidx.core.graphics.drawable.DrawableCompat
+import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
-
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.*
+import com.google.maps.android.clustering.ClusterManager
+import com.google.maps.android.heatmaps.Gradient
+import com.google.maps.android.heatmaps.HeatmapTileProvider
 import com.vmadalin.easypermissions.EasyPermissions
 import com.vmadalin.easypermissions.dialogs.SettingsDialog
-import id.my.okisulton.geofencing.adapter.CustomInfoAdapter
-import id.my.okisulton.geofencing.databinding.ActivityMapsBinding
-import id.my.okisulton.geofencing.databinding.CustomInfoWindowBinding
-import id.my.okisulton.geofencing.misc.*
+import id.my.okisulton.mapsSdk.databinding.ActivityMapsBinding
+import id.my.okisulton.mapsSdk.misc.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -36,7 +29,7 @@ class MapsActivity : AppCompatActivity(),
     EasyPermissions.PermissionCallbacks,
     GoogleMap.OnMarkerClickListener,
     GoogleMap.OnMarkerDragListener,
-    GoogleMap.OnPolylineClickListener{
+    GoogleMap.OnPolylineClickListener {
 
     companion object {
         const val PERMISSION_LOCATION_REQUEST_CODE = 1
@@ -51,6 +44,50 @@ class MapsActivity : AppCompatActivity(),
     private val masterFunction by lazy { MasterFunction() }
     private val shapes by lazy { Shapes() }
     private val overlays by lazy { Overlays() }
+
+    private lateinit var clusterManager: ClusterManager<MyItem>
+    private val localeList = listOf(
+        LatLng(
+            -7.757811596531729,
+            110.41946411132812,
+        ),
+        LatLng(
+            -7.761978786926806,
+            110.42487144470213,
+        ),
+        LatLng(
+            -7.766613674653602,
+            110.41997909545898,
+        ),
+        LatLng(
+            -7.77031304375889,
+            110.4127264022827,
+        ),
+        LatLng(
+            -7.769760266538134,
+            110.42667388916016,
+        ),
+        LatLng(
+            -7.77949754335223,
+            110.4122543334961,
+        ),
+        LatLng(
+            -7.780475510630797,
+            110.43474197387694,
+        ),
+        LatLng(
+            -7.767251499237745,
+            110.43757438659668,
+        ),
+        LatLng(
+            -7.756706008475139,
+            110.4328966140747,
+        ),
+        LatLng(
+            -7.757811596531729,
+            110.41946411132812,
+        ),
+    )
 
     private val jakarta = LatLng(-6.209932521996178, 106.85216437477612)
     private val kinarya = LatLng(-7.7646443734274415, 110.43661213363588)
@@ -68,11 +105,11 @@ class MapsActivity : AppCompatActivity(),
         val mapFragment = supportFragmentManager
             .findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
-        requestLocationPermission()
+//        requestLocationPermission()
         setupListener()
     }
 
-    private fun setupListener(){
+    private fun setupListener() {
         binding?.fabLoc?.setOnClickListener {
             masterFunction.showMessages("FAB Clicked", this)
         }
@@ -80,7 +117,7 @@ class MapsActivity : AppCompatActivity(),
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.maps_menu, menu)
-        return  true
+        return true
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -88,20 +125,27 @@ class MapsActivity : AppCompatActivity(),
         return true
     }
 
-    @SuppressLint("MissingPermission")
+    @SuppressLint("MissingPermission", "PotentialBehaviorOverride")
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
 
         // Add a marker in Sydney and move the camera
-//        mMap.addMarker(
-//            MarkerOptions()
-//                .position(jakarta)
-//                .title("Marker in Jakarta")
-//                .snippet("this is a desc")
-//                .draggable(true)
-//                .icon(masterFunction.fromVectorToBitmap(resources,R.drawable.ic_pin, Color.parseColor("#35858B"))))
-//
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(kinarya, 15f))
+        val jakartaMarker = mMap.addMarker(
+            MarkerOptions()
+                .position(localeList.first())
+                .title("Marker in Jakarta")
+                .snippet("this is a desc")
+                .draggable(true)
+                .icon(
+                    masterFunction.fromVectorToBitmap(
+                        resources,
+                        R.drawable.ic_pin,
+                        Color.parseColor("#35858B")
+                    )
+                )
+        )
+
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(kinarya, 10f))
         mMap.setOnMarkerClickListener(this)
         mMap.setOnMarkerDragListener(this)
 //        mMap.moveCamera(CameraUpdateFactory.newCameraPosition(cameraAndViewPort.positionCamera(jakarta)))
@@ -114,23 +158,24 @@ class MapsActivity : AppCompatActivity(),
 
         mMap.isMyLocationEnabled = true
 
-        val groundOverlay = overlays.addGroundOverlay(mMap)
+//        val groundOverlay = overlays.addGroundOverlay(mMap)
 
         //add from shape
 //        shapes.addPolygon(mMap)
         // Custom Info Window
-        mMap.setInfoWindowAdapter(CustomInfoAdapter(this))
+//        mMap.setInfoWindowAdapter(CustomInfoAdapter(this))
         typeAndStyle.setMapStyle(mMap, this)
 
+        addHeatmap()
 
-        mMap.setOnPolylineClickListener(this)
-        lifecycleScope.launch {
-            delay(3000L)
-            masterFunction.showLog(TAG = "GroundOverlay TAG",
-                messages = overlays.addGroundOverlayWithTag(mMap)?.tag.toString())
-            groundOverlay?.transparency = 0.5f
+//        mMap.setOnPolylineClickListener(this)
+//        lifecycleScope.launch {
+//            delay(3000L)
+//            masterFunction.showLog(TAG = "GroundOverlay TAG",
+//                messages = overlays.addGroundOverlayWithTag(mMap)?.tag.toString())
+//            groundOverlay?.transparency = 0.5f
 
-            // Add Shape
+        // Add Shape
 //            shapes.addCircle(mMap)
 //            shapes.addPolyline(mMap)
 
@@ -149,12 +194,38 @@ class MapsActivity : AppCompatActivity(),
 //                }
 //
 //            })
-            // to restrict camera movement
+        // to restrict camera movement
 //            mMap.setLatLngBoundsForCameraTarget(cameraAndViewPort.temanggung)
-        }
+//        }
+//
+//        singleClickMap()
+//        longClickMap()
+    }
 
-        singleClickMap()
-        longClickMap()
+    private fun addHeatmap(){
+        val color = intArrayOf(
+            Color.rgb(88, 37, 155), // Purple
+            Color.rgb(84, 182, 239), // Blue
+            Color.rgb(255, 51, 51), // Red
+        )
+
+        val startPoint = floatArrayOf(0.25f, 0.5f, 1f)
+        val gradient = Gradient(color, startPoint)
+
+        val provider = HeatmapTileProvider.Builder()
+            .data(localeList)
+            .gradient(gradient)
+            .opacity(0.30)
+            .build()
+        val overlay = mMap.addTileOverlay(TileOverlayOptions().tileProvider(provider))
+
+        lifecycleScope.launch {
+            delay(5000)
+            overlay?.clearTileCache()
+            provider.setRadius(50)
+            delay(3000)
+            overlay?.remove()
+        }
     }
 
     private fun longClickMap() {
@@ -165,7 +236,8 @@ class MapsActivity : AppCompatActivity(),
                     .position(it)
                     .title("New Marker")
                     .snippet("Info Window")
-                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.pin_png)))
+                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.pin_png))
+            )
             mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(it, 20f), 2000, null)
         }
     }
@@ -181,40 +253,10 @@ class MapsActivity : AppCompatActivity(),
         _binding = null
     }
 
-    private fun requestLocationPermission(){
-        EasyPermissions.requestPermissions(
-            this,
-            "This application not working without location permission!",
-            PERMISSION_LOCATION_REQUEST_CODE,
-            Manifest.permission.ACCESS_FINE_LOCATION
-        )
-    }
-
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<out String>,
-        grantResults: IntArray
-    ) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        EasyPermissions.onRequestPermissionsResult(requestCode, permissions, grantResults, this)
-    }
-
-    override fun onPermissionsDenied(requestCode: Int, perms: List<String>) {
-        if (EasyPermissions.somePermissionPermanentlyDenied(this, perms)){
-            SettingsDialog.Builder(this).build().show()
-        } else {
-            requestLocationPermission()
-        }
-    }
-
-    override fun onPermissionsGranted(requestCode: Int, perms: List<String>) {
-        setViewVisibility()
-    }
-
-    private fun setViewVisibility(){
-        if (hasLocationPermission()){
+    private fun setViewVisibility() {
+        if (hasLocationPermission()) {
             masterFunction.showMessages("Permission Granted", this)
-        }else{
+        } else {
             masterFunction.showMessages("Permission Denied", this)
         }
     }
@@ -244,6 +286,28 @@ class MapsActivity : AppCompatActivity(),
 
     override fun onPolylineClick(p0: Polyline) {
         masterFunction.showMessages("Polyline Clicked", this)
+    }
+
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        EasyPermissions.onRequestPermissionsResult(requestCode, permissions, grantResults, this)
+    }
+
+    override fun onPermissionsDenied(requestCode: Int, perms: List<String>) {
+        if (EasyPermissions.somePermissionPermanentlyDenied(this, perms)) {
+            SettingsDialog.Builder(this).build().show()
+        } else {
+//            requestLocationPermission()
+        }
+    }
+
+    override fun onPermissionsGranted(requestCode: Int, perms: List<String>) {
+        setViewVisibility()
     }
 
 

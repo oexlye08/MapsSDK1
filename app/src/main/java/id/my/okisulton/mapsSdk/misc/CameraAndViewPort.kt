@@ -1,4 +1,4 @@
-package id.my.okisulton.geofencing.misc
+package id.my.okisulton.mapsSdk.misc
 
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng

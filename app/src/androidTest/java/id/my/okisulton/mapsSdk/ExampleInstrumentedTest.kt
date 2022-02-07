@@ -1,4 +1,4 @@
-package id.my.okisulton.geofencing
+package id.my.okisulton.mapsSdk
 
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4
